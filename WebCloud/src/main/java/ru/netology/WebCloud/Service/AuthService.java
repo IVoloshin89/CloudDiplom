@@ -24,6 +24,7 @@ public class AuthService {
         userStorage.put("admin@mail.ru", "admin123");
         userStorage.put("user@mail.ru", "user123");
         userStorage.put("test@mail.ru", "test123");
+        userStorage.put("a", "123");
     }
 
     /**
@@ -33,13 +34,13 @@ public class AuthService {
      * @return ответ с токеном
      */
     public LoginResponse authenticate(LoginRequest request) {
-        log.info("Начата авторизация для email: {}", request.getEmail());
+        log.info("Начата авторизация для email: {}", request.getLogin());
 
-        if(request.getEmail() == null){
+        if (request.getLogin() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Поле email пустое");
         }
 
-        String toklogin = request.getEmail();
+        String toklogin = request.getLogin();
         String tokpassword = request.getPassword();
 
         if (!userStorage.containsKey(toklogin)) {
@@ -53,11 +54,16 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный логин и пароль");
         }
 
+        //Добавлеяем токен в хранилище
         String token = generateUniqueToken(toklogin);
         tokenStorage.put(token, toklogin);
 
+
         log.info("Успешная авторизация для пользователя: {}. Токен: {}",
                 toklogin, maskToken(token));
+
+        log.info("Хранилище токеном сейчас пользователей = {}", tokenStorage.size());
+        System.out.println(tokenStorage);
 
         return new LoginResponse(token);
     }
@@ -89,15 +95,14 @@ public class AuthService {
     /**
      * выход из системы и удаление токена
      */
-    public void logout(String token){
-        String login = tokenStorage.remove(token);
-        if(login == null){
-            log.info("Пользователь вышел из системы");
+    public void logout(String token) {
+        String name = tokenStorage.get(token.substring(7));
+        String login = tokenStorage.remove(token.substring(7));
+        if (login == null) {
+            log.info("Пользователь не в системе");
         }
+        log.info("Хранилище токенов сейчас пользователей = {}", tokenStorage.size());
+        log.info("Пользователь {} вышел из системы", name);
+        System.out.println(tokenStorage);
     }
-
-
-
-
-
 }

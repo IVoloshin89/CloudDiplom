@@ -34,7 +34,7 @@ public class Controller {
         }
 
         // Если поля null - значит фронт отправил {"email": null, "password": null}
-        if (request.getEmail() == null) {
+        if (request.getLogin() == null) {
             System.out.println("ERROR: Email field is null in request");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Поле 'email' обязательно");
@@ -44,7 +44,7 @@ public class Controller {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Поле 'password' обязательно");
         }
-        System.out.println("Email from request: '" + request.getEmail() + "'");
+        System.out.println("Email from request: '" + request.getLogin() + "'");
         System.out.println("Password from request: '" + request.getPassword() + "'");
 
 

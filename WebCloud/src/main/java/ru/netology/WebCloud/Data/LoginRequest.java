@@ -11,14 +11,11 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class LoginRequest {
 
-    @JsonProperty("email")
-    private String email;
+    @JsonProperty("login")
+    private String login;
 
     @JsonProperty("password")
     private String password;
 
 
-    public String getLogin(){
-        return email;
-    }
 }
