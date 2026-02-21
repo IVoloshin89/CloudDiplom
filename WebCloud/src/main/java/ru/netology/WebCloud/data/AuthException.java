@@ -1,4 +1,4 @@
-package ru.netology.WebCloud.Data;
+package ru.netology.WebCloud.data;
 
 import lombok.Getter;
 

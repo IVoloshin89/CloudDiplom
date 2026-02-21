@@ -1,15 +1,14 @@
-package ru.netology.WebCloud.Service;
+package ru.netology.WebCloud.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import ru.netology.WebCloud.Data.FileInfo;
+import ru.netology.WebCloud.data.FileInfo;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +33,9 @@ public class FileService {
         this.authService = authService;
     }
 
+    /**
+     * Загрузка файла (POST /file)
+     */
     public void uploadFile(String authToken, MultipartFile file) {
         String userLogin = authService.validateToken(authToken);
         String fileName = file.getOriginalFilename();
@@ -95,7 +97,7 @@ public class FileService {
     /**
      * Скачиваение файла (GET /file)
      */
-    public Resource downLoadFile(String userName, String fileName){
+    public Resource downLoadFile(String userName, String fileName) {
         Path userDir = Paths.get(storagePath, sanitizeUsername(userName));
         Path filePath = userDir.resolve(fileName);
 
@@ -106,8 +108,32 @@ public class FileService {
             }
 
             return new UrlResource(filePath.toUri());
-        }catch (IOException e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Невозможно скачать файл");
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Невозможно скачать файл");
+        }
+    }
+
+    /**
+     * Переименование файла (PUT /file)
+     */
+    public void renameFile(String userName, String fileName, String newFileName) {
+
+        try {
+
+            Path userDir = Paths.get(storagePath, userName);
+            Path oldPath = userDir.resolve(fileName).normalize();
+            Path newPath = userDir.resolve(newFileName).normalize();
+
+
+            if (!Files.exists(oldPath)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Файл не найден");
+            }
+
+            // Переименовываем
+            Files.move(oldPath, newPath);
+
+        } catch (IOException e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Ошибка переимнования файла");
         }
     }
 
@@ -120,9 +146,7 @@ public class FileService {
 
 
     public List<FileInfo> getUserFiles(String userLogin) {
-
         Path userDir = Paths.get(storagePath, sanitizeUsername(userLogin));
-
         //Получаем список файлов
         try {
             List<FileInfo> userFiles = Files.list(userDir)
@@ -152,7 +176,6 @@ public class FileService {
             return null;
         }
     }
-
 }
 
 

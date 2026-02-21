@@ -1,14 +1,14 @@
-package ru.netology.WebCloud.Error;
+package ru.netology.WebCloud.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ListError {
-
+@NoArgsConstructor
+public class ErrorResponse {
     private String message;
-    private Integer id;
+    private Integer id;    //код ошибки
+
 }

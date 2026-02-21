@@ -1,11 +1,9 @@
-package ru.netology.WebCloud.Data;
+package ru.netology.WebCloud.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor

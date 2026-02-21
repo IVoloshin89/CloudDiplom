@@ -1,12 +1,14 @@
-package ru.netology.WebCloud.Service;
+package ru.netology.WebCloud.service;
 
-import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.netology.WebCloud.Data.LoginRequest;
-import ru.netology.WebCloud.Data.LoginResponse;
+import ru.netology.WebCloud.data.LoginRequest;
+import ru.netology.WebCloud.data.LoginResponse;
+import ru.netology.WebCloud.data.User;
+import ru.netology.WebCloud.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,16 +18,10 @@ import java.util.UUID;
 @Slf4j
 public class AuthService {
 
-    private final Map<String, String> userStorage = new HashMap<>();
+    @Autowired
+    private UserRepository userRepository;
 
     private final Map<String, String> tokenStorage = new HashMap<>();
-
-    public AuthService() {
-        userStorage.put("admin@mail.ru", "admin123");
-        userStorage.put("user@mail.ru", "user123");
-        userStorage.put("test@mail.ru", "test123");
-        userStorage.put("a", "123");
-    }
 
     /**
      * Основной метод авторизации
@@ -43,15 +39,11 @@ public class AuthService {
         String toklogin = request.getLogin();
         String tokpassword = request.getPassword();
 
-        if (!userStorage.containsKey(toklogin)) {
-            log.warn("Пользователь не найден: {}", toklogin);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный логин и пароль");
-        }
+        User user = userRepository.findByLogin(toklogin)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный логин"));
 
-        String storedPassword = userStorage.get(toklogin);
-        if (!storedPassword.equals(tokpassword)) {
-            log.warn("Неверный пароль пользователя: {}", toklogin);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный логин и пароль");
+        if (!user.getPassword().equals(tokpassword)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный пароль");
         }
 
         //Добавлеяем токен в хранилище
@@ -80,6 +72,7 @@ public class AuthService {
 
     /**
      * Проверка валидности токена
+     * @return возвращаем login
      */
     public String validateToken(String token) {
         if (token == null || token.isEmpty()) {
@@ -103,6 +96,5 @@ public class AuthService {
         }
         log.info("Хранилище токенов сейчас пользователей = {}", tokenStorage.size());
         log.info("Пользователь {} вышел из системы", name);
-        System.out.println(tokenStorage);
     }
 }

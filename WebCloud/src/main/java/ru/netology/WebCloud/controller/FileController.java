@@ -1,4 +1,4 @@
-package ru.netology.WebCloud.Controller;
+package ru.netology.WebCloud.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.netology.WebCloud.Data.FileInfo;
-import ru.netology.WebCloud.Service.AuthService;
-import ru.netology.WebCloud.Service.FileService;
+import ru.netology.WebCloud.data.FileInfo;
+import ru.netology.WebCloud.data.RenameRequest;
+import ru.netology.WebCloud.service.AuthService;
+import ru.netology.WebCloud.service.FileService;
 
 import java.util.List;
 
@@ -75,6 +76,21 @@ public class FileController {
 
         return fileService.downLoadFile(userName,filename);
     }
+
+    @PutMapping("/file")
+    public void renameFile(
+            @RequestHeader("auth-token") String authToken,
+            @RequestParam("filename") String filename,
+            @RequestBody RenameRequest request){
+        log.info("Запрос на изменение файла {} на {}",filename, request.getFilename() );
+        String userName = authService.validateToken(authToken.substring(7));
+
+        fileService.renameFile(userName, filename, request.getFilename());
+
+    }
+
+
+
 
     @GetMapping("/list")
     public List<FileInfo> userFiles(@RequestHeader("auth-token") String authToken,
