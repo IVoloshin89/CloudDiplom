@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import ru.netology.WebCloud.data.FileInfo;
+import ru.netology.WebCloud.domain.FileInfo;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,8 +36,7 @@ public class FileService {
     /**
      * Загрузка файла (POST /file)
      */
-    public void uploadFile(String authToken, MultipartFile file) {
-        String userLogin = authService.validateToken(authToken);
+    public void uploadFile(String userLogin, MultipartFile file) {
         String fileName = file.getOriginalFilename();
         log.info("Загрузка файла {} пользователя: {}", fileName, userLogin);
 
@@ -70,8 +69,7 @@ public class FileService {
     /**
      * Удаление файла (DELETE /file)
      */
-    public void deleteFile(String authToken, String filename) {
-        String userLogin = authService.validateToken(authToken.substring(7));
+    public void deleteFile(String userLogin, String filename) {
         log.info("Удаление файла {} пользователем: {}", filename, userLogin);
 
         if (filename == null) {
@@ -119,21 +117,18 @@ public class FileService {
     public void renameFile(String userName, String fileName, String newFileName) {
 
         try {
-
             Path userDir = Paths.get(storagePath, userName);
             Path oldPath = userDir.resolve(fileName).normalize();
             Path newPath = userDir.resolve(newFileName).normalize();
 
-
             if (!Files.exists(oldPath)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Файл не найден");
             }
-
             // Переименовываем
             Files.move(oldPath, newPath);
 
-        } catch (IOException e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Ошибка переимнования файла");
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка переимнования файла");
         }
     }
 
@@ -143,7 +138,6 @@ public class FileService {
     private String sanitizeUsername(String username) {
         return username.replaceAll("[^a-zA-Z0-9._-]", "_");
     }
-
 
     public List<FileInfo> getUserFiles(String userLogin) {
         Path userDir = Paths.get(storagePath, sanitizeUsername(userLogin));

@@ -1,6 +1,5 @@
 package ru.netology.WebCloud.controller;
 
-import jakarta.persistence.Table;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,7 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import ru.netology.WebCloud.data.RenameRequest;
+import ru.netology.WebCloud.dto.RenameRequest;
 import ru.netology.WebCloud.service.AuthService;
 import ru.netology.WebCloud.service.FileService;
 

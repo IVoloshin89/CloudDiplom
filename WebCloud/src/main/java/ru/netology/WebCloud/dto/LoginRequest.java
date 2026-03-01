@@ -1,4 +1,4 @@
-package ru.netology.WebCloud.data;
+package ru.netology.WebCloud.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

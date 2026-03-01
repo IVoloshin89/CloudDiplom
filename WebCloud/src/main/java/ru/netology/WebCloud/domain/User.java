@@ -1,4 +1,4 @@
-package ru.netology.WebCloud.data;
+package ru.netology.WebCloud.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -19,5 +19,7 @@ public class User {
     @JsonIgnore
     @Column(nullable = false)
     private String password;
+
+    private String token;
 
 }

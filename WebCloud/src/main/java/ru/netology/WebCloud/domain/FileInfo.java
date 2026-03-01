@@ -1,4 +1,4 @@
-package ru.netology.WebCloud.data;
+package ru.netology.WebCloud.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

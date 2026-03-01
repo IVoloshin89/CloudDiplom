@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.netology.WebCloud.data.LoginRequest;
-import ru.netology.WebCloud.data.LoginResponse;
-import ru.netology.WebCloud.data.User;
+import ru.netology.WebCloud.domain.User;
 import ru.netology.WebCloud.repository.UserRepository;
 
 import java.util.HashMap;
@@ -23,43 +21,6 @@ public class AuthService {
 
     private final Map<String, String> tokenStorage = new HashMap<>();
 
-    /**
-     * Основной метод авторизации
-     *
-     * @param request запрос с логином и паролем
-     * @return ответ с токеном
-     */
-    public LoginResponse authenticate(LoginRequest request) {
-        log.info("Начата авторизация для email: {}", request.getLogin());
-
-        if (request.getLogin() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Поле email пустое");
-        }
-
-        String toklogin = request.getLogin();
-        String tokpassword = request.getPassword();
-
-        User user = userRepository.findByLogin(toklogin)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный логин"));
-
-        if (!user.getPassword().equals(tokpassword)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный пароль");
-        }
-
-        //Добавлеяем токен в хранилище
-        String token = generateUniqueToken(toklogin);
-        tokenStorage.put(token, toklogin);
-
-
-        log.info("Успешная авторизация для пользователя: {}. Токен: {}",
-                toklogin, maskToken(token));
-
-        log.info("Хранилище токеном сейчас пользователей = {}", tokenStorage.size());
-        System.out.println(tokenStorage);
-
-        return new LoginResponse(token);
-    }
-
     private String generateUniqueToken(String login) {
         // Используем UUID и добавляем префикс для читаемости
         return "cloud_token_" + UUID.randomUUID().toString().replace("-", "_");
@@ -72,6 +33,7 @@ public class AuthService {
 
     /**
      * Проверка валидности токена
+     *
      * @return возвращаем login
      */
     public String validateToken(String token) {
@@ -97,4 +59,48 @@ public class AuthService {
         log.info("Хранилище токенов сейчас пользователей = {}", tokenStorage.size());
         log.info("Пользователь {} вышел из системы", name);
     }
+
+    public String getUserByToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Токен отсуствует");
+        }
+
+        String clearToken = token;
+        if (clearToken.startsWith("Bearer ")) {
+            clearToken = clearToken.substring(7);
+        }
+
+        String login = tokenStorage.get(clearToken);
+        if (login == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Не корректный токен");
+        }
+
+        return login;
+    }
+
+    public User authenticate(String login, String password) {
+        log.info("Начат авторизация юзера {}", login);
+
+        if (login == null || login.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Логин не может быть пустым");
+        }
+
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неверный логин"));
+
+        if (!user.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неверный пароль");
+        }
+
+        String token = generateUniqueToken(login);
+        user.setToken(token);
+
+        tokenStorage.put(token, login);
+
+        log.info("Успешная авторизация юзера {}", login);
+        log.info("Хранилище токенов = {}",tokenStorage.size());
+
+        return user;
+    }
+
 }

@@ -1,14 +1,13 @@
 package ru.netology.WebCloud.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.netology.WebCloud.data.FileInfo;
-import ru.netology.WebCloud.data.RenameRequest;
+import ru.netology.WebCloud.domain.FileInfo;
+import ru.netology.WebCloud.dto.RenameRequest;
 import ru.netology.WebCloud.service.AuthService;
 import ru.netology.WebCloud.service.FileService;
 
@@ -33,7 +32,7 @@ public class FileController {
             @RequestHeader("auth-token") String authToken,
             @RequestPart("file") MultipartFile file) {
 
-        String realToken = authToken.substring(7);
+        String userLogin = authService.getUserByToken(authToken);
         String fileName = file.getOriginalFilename();
         log.info("Имя файла загрузки {}", fileName);
 
@@ -42,13 +41,11 @@ public class FileController {
         log.info("Filename из запроса: '{}'", fileName);
         log.info("Оригинальное имя файла: '{}'", file.getOriginalFilename());
         log.info("Токен входа {}", authToken);
-        log.info("Токен входа {}", realToken);
         log.info("Размер файла: {} байт", file.getSize());
         log.info("Content type: {}", file.getContentType());
-        //log.info("Hash передан: {}", hash != null ? "да" : "нет");
 
         log.info("POST /file - Запрос на загрузку файла {}", fileName);
-        fileService.uploadFile(realToken, file);
+        fileService.uploadFile(userLogin, file);
         log.info("Файл {} успешно загружен", fileName);
     }
 
@@ -64,33 +61,31 @@ public class FileController {
             @RequestParam("filename") String filename) {
 
         log.info("DELETE /file - Запрос на удаление файла: {}", filename);
-        fileService.deleteFile(authToken, filename);
+        String userLogin = authService.getUserByToken(authToken);
+        fileService.deleteFile(userLogin, filename);
         log.info("Файл {} успешно удален", filename);
     }
 
     @GetMapping("/file")
-    public Resource downLoadFile(@RequestHeader("auth-token") String authToken,
-                                 @RequestParam("filename") String filename){
-        log.info("Запрос на скачивание файла {}",filename);
-        String userName = authService.validateToken(authToken.substring(7));
+    public Resource downLoadFile(
+            @RequestHeader("auth-token") String authToken,
+            @RequestParam("filename") String filename) {
+        log.info("Запрос на скачивание файла {}", filename);
+        String userLogin = authService.getUserByToken(authToken);
 
-        return fileService.downLoadFile(userName,filename);
+        return fileService.downLoadFile(userLogin, filename);
     }
 
     @PutMapping("/file")
     public void renameFile(
             @RequestHeader("auth-token") String authToken,
             @RequestParam("filename") String filename,
-            @RequestBody RenameRequest request){
-        log.info("Запрос на изменение файла {} на {}",filename, request.getFilename() );
-        String userName = authService.validateToken(authToken.substring(7));
+            @RequestBody RenameRequest request) {
+        log.info("Запрос на изменение файла {} на {}", filename, request.getFilename());
+        String userLogin = authService.getUserByToken(authToken);
 
-        fileService.renameFile(userName, filename, request.getFilename());
-
+        fileService.renameFile(userLogin, filename, request.getFilename());
     }
-
-
-
 
     @GetMapping("/list")
     public List<FileInfo> userFiles(@RequestHeader("auth-token") String authToken,
@@ -99,6 +94,4 @@ public class FileController {
         log.info("Запрос листа файлов для пользователя {}", userName);
         return fileService.getUserFiles(userName);
     }
-
-
 }
