@@ -12,6 +12,4 @@ public class LoginResponse {
 
     @JsonProperty("auth-token") //Для совместимости с фронтом
     private String authToken;
-
-    //private LocalDateTime expiresAt; //Время истечения
-}
+   }

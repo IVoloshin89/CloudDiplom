@@ -55,23 +55,22 @@ public class FileServiceTest {
                 TEST_FILE_CONTENT.getBytes()
         );
 
-        when(authService.validateToken(TEST_TOKEN)).thenReturn(TEST_USERNAME);
+        //when(authService.validateToken(TEST_TOKEN)).thenReturn(TEST_USERNAME);
 
         // When
-        fileService.uploadFile(TEST_TOKEN, mockFile);
+        fileService.uploadFile(TEST_USERNAME, mockFile);
 
         // Then
         Path expectedPath = tempDir.resolve(TEST_USERNAME).resolve(TEST_FILENAME);
         assertTrue(Files.exists(expectedPath));
         assertEquals(TEST_FILE_CONTENT, Files.readString(expectedPath));
-        verify(authService, times(1)).validateToken(TEST_TOKEN);
+        //verify(authService, times(1)).validateToken(TEST_TOKEN);
     }
 
     @Test
     void deleteFileTest() throws IOException {
         // Given
         String tokenWithoutBearer = TEST_TOKEN.substring(7);
-        when(authService.validateToken(tokenWithoutBearer)).thenReturn(TEST_USERNAME);
 
         // Создаем тестовый файл
         Path userDir = tempDir.resolve(TEST_USERNAME);
@@ -80,11 +79,10 @@ public class FileServiceTest {
         Files.writeString(filePath, TEST_FILE_CONTENT);
 
         // When
-        fileService.deleteFile(TEST_TOKEN, TEST_FILENAME);
+        fileService.deleteFile(TEST_USERNAME, TEST_FILENAME);
 
         // Then
         assertFalse(Files.exists(filePath));
-        verify(authService, times(1)).validateToken(tokenWithoutBearer);
     }
 
     @Test
@@ -124,9 +122,6 @@ public class FileServiceTest {
         assertTrue(Files.exists(newPath));
         assertEquals(TEST_FILE_CONTENT, Files.readString(newPath));
     }
-
-
-
 
 
 }

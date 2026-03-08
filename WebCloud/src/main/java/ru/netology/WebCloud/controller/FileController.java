@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
+@RequestMapping("/cloud")
 public class FileController {
 
     @Autowired

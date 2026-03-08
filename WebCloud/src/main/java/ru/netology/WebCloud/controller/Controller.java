@@ -10,7 +10,7 @@ import ru.netology.WebCloud.dto.LoginResponse;
 import ru.netology.WebCloud.service.AuthService;
 
 @RestController
-//@RequestMapping("/cloud")
+@RequestMapping("/cloud")
 public class Controller {
 
     @Autowired
